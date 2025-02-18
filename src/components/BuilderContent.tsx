@@ -84,10 +84,6 @@ const BuilderContent = () => {
         <BuilderComponent 
           model={BUILDER_MODEL} 
           content={content}
-          options={{
-            lazy: true,
-            prerender: true
-          }}
         />
       </Suspense>
     </div>
