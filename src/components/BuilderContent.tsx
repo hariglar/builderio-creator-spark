@@ -10,11 +10,16 @@ const BuilderContent = () => {
   const isPreviewing = useIsPreviewing();
 
   useEffect(() => {
+    // Initialize content fetching
     const fetchContent = async () => {
       try {
+        const searchParams = new URLSearchParams(window.location.search);
+        const isPreviewing = searchParams.get('builder.preview');
+
         const content = await builder
           .get(BUILDER_MODEL, {
-            url: window.location.pathname
+            url: window.location.pathname,
+            preview: isPreviewing === 'true'
           })
           .promise();
 
@@ -29,6 +34,7 @@ const BuilderContent = () => {
     fetchContent();
   }, []);
 
+  // Show loading state
   if (loading) {
     return (
       <div className="w-full space-y-4 animate-pulse">
@@ -39,6 +45,7 @@ const BuilderContent = () => {
     );
   }
 
+  // Show no content message if there's no content and we're not in preview mode
   if (!content && !isPreviewing) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
@@ -52,6 +59,7 @@ const BuilderContent = () => {
     );
   }
 
+  // Render the Builder.io content
   return (
     <div className="builder-content">
       <BuilderComponent model={BUILDER_MODEL} content={content} />
