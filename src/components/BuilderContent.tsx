@@ -26,8 +26,11 @@ const BuilderContent = () => {
           .get(BUILDER_MODEL, {
             url: window.location.pathname,
             preview: isPreviewing === 'true',
-            cacheSeconds: process.env.NODE_ENV === 'production' ? 60 : 0, // Cache in production
-            staleCacheSeconds: 600 // Allow stale content for 10 minutes
+            cacheSeconds: process.env.NODE_ENV === 'production' ? 3600 : 0, // Cache for 1 hour in production
+            staleCacheSeconds: 3600, // Allow stale content for 1 hour
+            userAttributes: {
+              device: 'desktop'
+            }
           })
           .promise();
 
@@ -45,7 +48,6 @@ const BuilderContent = () => {
 
     fetchContent();
 
-    // Cleanup function to prevent memory leaks
     return () => {
       isMounted = false;
     };
@@ -79,7 +81,14 @@ const BuilderContent = () => {
   return (
     <div className="builder-content">
       <Suspense fallback={<LoadingSkeleton />}>
-        <BuilderComponent model={BUILDER_MODEL} content={content} />
+        <BuilderComponent 
+          model={BUILDER_MODEL} 
+          content={content}
+          options={{
+            lazy: true,
+            prerender: true
+          }}
+        />
       </Suspense>
     </div>
   );

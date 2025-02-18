@@ -8,7 +8,17 @@ const BuilderContent = lazy(() => import('@/components/BuilderContent'));
 
 const Index = () => {
   useEffect(() => {
+    // Initialize Builder.io
     initBuilder();
+
+    // Preload critical resources
+    if ('preload' in document.createElement('link')) {
+      const preloadLink = document.createElement('link');
+      preloadLink.rel = 'preload';
+      preloadLink.as = 'script';
+      preloadLink.href = '/assets/index-BtPq-eqO.js';
+      document.head.appendChild(preloadLink);
+    }
   }, []);
 
   return (
