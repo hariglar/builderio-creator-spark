@@ -1,8 +1,13 @@
 
-import { useEffect, useState } from 'react';
-import { BuilderComponent, builder, useIsPreviewing } from '@builder.io/react';
+import { Suspense, lazy, useEffect, useState } from 'react';
+import { builder, useIsPreviewing } from '@builder.io/react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BUILDER_MODEL } from '@/lib/builder';
+
+// Lazy load the BuilderComponent
+const BuilderComponent = lazy(() => import('@builder.io/react').then(module => ({
+  default: module.BuilderComponent
+})));
 
 const BuilderContent = () => {
   const [content, setContent] = useState(null);
@@ -10,7 +15,8 @@ const BuilderContent = () => {
   const isPreviewing = useIsPreviewing();
 
   useEffect(() => {
-    // Initialize content fetching
+    let isMounted = true;
+
     const fetchContent = async () => {
       try {
         const searchParams = new URLSearchParams(window.location.search);
@@ -19,33 +25,44 @@ const BuilderContent = () => {
         const content = await builder
           .get(BUILDER_MODEL, {
             url: window.location.pathname,
-            preview: isPreviewing === 'true'
+            preview: isPreviewing === 'true',
+            cacheSeconds: process.env.NODE_ENV === 'production' ? 60 : 0, // Cache in production
+            staleCacheSeconds: 600 // Allow stale content for 10 minutes
           })
           .promise();
 
-        setContent(content);
-        setLoading(false);
+        if (isMounted) {
+          setContent(content);
+          setLoading(false);
+        }
       } catch (error) {
         console.error('Error fetching Builder.io content:', error);
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchContent();
+
+    // Cleanup function to prevent memory leaks
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Show loading state
+  const LoadingSkeleton = () => (
+    <div className="w-full space-y-4 animate-pulse">
+      <Skeleton className="h-[40vh] w-full rounded-lg" />
+      <Skeleton className="h-4 w-2/3 rounded-lg" />
+      <Skeleton className="h-4 w-1/2 rounded-lg" />
+    </div>
+  );
+
   if (loading) {
-    return (
-      <div className="w-full space-y-4 animate-pulse">
-        <Skeleton className="h-[40vh] w-full rounded-lg" />
-        <Skeleton className="h-4 w-2/3 rounded-lg" />
-        <Skeleton className="h-4 w-1/2 rounded-lg" />
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
-  // Show no content message if there's no content and we're not in preview mode
   if (!content && !isPreviewing) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
@@ -59,10 +76,11 @@ const BuilderContent = () => {
     );
   }
 
-  // Render the Builder.io content
   return (
     <div className="builder-content">
-      <BuilderComponent model={BUILDER_MODEL} content={content} />
+      <Suspense fallback={<LoadingSkeleton />}>
+        <BuilderComponent model={BUILDER_MODEL} content={content} />
+      </Suspense>
     </div>
   );
 };

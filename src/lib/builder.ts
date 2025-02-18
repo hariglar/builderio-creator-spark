@@ -1,5 +1,5 @@
 
-import { builder } from '@builder.io/react';
+import { builder, Builder } from '@builder.io/react';
 
 // Initialize Builder with your public API key
 export const initBuilder = () => {
@@ -10,8 +10,8 @@ export const initBuilder = () => {
     const searchParams = new URLSearchParams(window.location.search);
     if (searchParams.get('builder.preview')) {
       builder.allowCustomFonts = true;
-      builder.isEditing = true;
-      builder.isPreviewing = true;
+      Builder.isEditing = true;
+      Builder.isPreviewing = true;
     }
   }
 };
