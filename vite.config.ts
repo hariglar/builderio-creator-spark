@@ -34,8 +34,28 @@ export default defineConfig(({ mode }) => ({
       compress: {
         drop_console: true,
         drop_debugger: true
+      },
+      mangle: {
+        safari10: true
+      },
+      format: {
+        comments: false
       }
     },
-    reportCompressedSize: false
+    reportCompressedSize: false,
+    sourcemap: false,
+    // Handle eval warnings from Builder.io
+    optimizeDeps: {
+      esbuildOptions: {
+        define: {
+          global: 'globalThis'
+        }
+      }
+    }
+  },
+  esbuild: {
+    supported: {
+      'top-level-await': true
+    }
   }
 }));
