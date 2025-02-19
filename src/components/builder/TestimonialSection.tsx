@@ -2,8 +2,21 @@
 import { Builder } from '@builder.io/react';
 import { Star } from 'lucide-react';
 
-export const TestimonialSection = () => {
-  const testimonials = [
+interface Testimonial {
+  name: string;
+  review: string;
+  rating: number;
+  image: string;
+}
+
+interface TestimonialSectionProps {
+  sectionTitle?: string;
+  testimonials?: Testimonial[];
+}
+
+export const TestimonialSection = ({
+  sectionTitle = 'تجارب العملاء',
+  testimonials = [
     {
       name: 'سارة أحمد',
       review: 'تجربة رائعة مع المنتجات',
@@ -28,12 +41,12 @@ export const TestimonialSection = () => {
       rating: 5,
       image: 'https://placehold.co/100x100'
     }
-  ];
-
+  ]
+}: TestimonialSectionProps) => {
   return (
     <div className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
       <h2 className="text-2xl font-bold text-right text-gray-900 mb-8">
-        تجارب العملاء
+        {sectionTitle}
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {testimonials.map((testimonial, index) => (
@@ -59,6 +72,37 @@ export const TestimonialSection = () => {
 
 Builder.registerComponent(TestimonialSection, {
   name: 'Testimonial Section',
-  inputs: [],
+  inputs: [
+    {
+      name: 'sectionTitle',
+      type: 'string',
+      defaultValue: 'تجارب العملاء'
+    },
+    {
+      name: 'testimonials',
+      type: 'list',
+      subFields: [
+        {
+          name: 'name',
+          type: 'string'
+        },
+        {
+          name: 'review',
+          type: 'string'
+        },
+        {
+          name: 'rating',
+          type: 'number',
+          defaultValue: 5,
+          min: 1,
+          max: 5
+        },
+        {
+          name: 'image',
+          type: 'string',
+          defaultValue: 'https://placehold.co/100x100'
+        }
+      ]
+    }
+  ],
 });
-
